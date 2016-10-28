@@ -1,43 +1,43 @@
 #include "precomp.hpp"
 
-#include <iostream>
-
 namespace cv
 {
-
-static int countNeighbors(Mat mat, int x, int y)
-{
-    int count = 0, power = 1;
-    int iOrder[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
-    int jOrder[8] = {-1, -1, -1, 0, 1, 1, 1, 0};
-    for(int pos = 0; pos < 8; pos++){
-	int i = iOrder[pos], j = jOrder[pos];
-        if(x+i < 0 || x+i >= mat.rows || y+j < 0 || y+j >= mat.cols){
-        }else{
-            count += power * mat.at<uchar>(x+i, y+j);
-        }
-        power *= 2;
-    }
-    return count;
-}
 
 static int applyLUTNeighbors(InputArray _src, OutputArray _dst, uchar *lut)
 {
     Mat src = _src.getMat();
+    CV_Assert(src.type() == CV_8UC1);
+    CV_Assert(src.channels() == 1);
     _dst.create(src.size(), src.type());
     Mat dst = _dst.getMat();
     int numChanges = 0;
-    for( int i = 0; i < src.rows; i++ ){
-        for( int j = 0; j < src.cols; j++ ){
-	    if(src.at<uchar>(i, j) == 0){
-                dst.at<uchar>(i, j) = 0;
+    uchar *dstptr = dst.ptr<uchar>(0);
+    for(int j = 0; j < src.cols; j++){
+        dstptr[j] = 0;
+    }
+    for(int i = 1; i < src.rows-1; i++){
+        dstptr = dst.ptr<uchar>(i);
+	dstptr[0] = 0;
+	dstptr[src.cols-1] = 0;
+	uchar *up = src.ptr<uchar>(i-1);
+        uchar *cur = src.ptr<uchar>(i);
+	uchar *down = src.ptr<uchar>(i+1);
+        for(int j = 1; j < src.cols-1; j++){
+	    if(cur[j] == 0){
+                dstptr[j] = 0;
             }else{
-                dst.at<uchar>(i, j) = lut[countNeighbors(src, i, j)];
+                dstptr[j] = lut[  1*  up[j-1] +   2*  up[j] +   4*  up[j+1] +
+		                128* cur[j-1] +                 8* cur[j+1] +
+				 64*down[j-1] +  32*down[j] +  16*down[j+1]];
             }
-            if(dst.at<uchar>(i, j) != src.at<uchar>(i, j)){
+            if(dstptr[j] != cur[j]){
                 numChanges++;
             }
         }
+    }
+    dstptr = dst.ptr<uchar>(src.rows-1);
+    for(int j = 0; j < src.cols; j++){
+        dstptr[j] = 0;
     }
     return numChanges;
 }
@@ -45,37 +45,32 @@ static int applyLUTNeighbors(InputArray _src, OutputArray _dst, uchar *lut)
 static void zhangSuenThinning(InputArray _src, OutputArray _dst)
 {
     uchar lut1[256] = {
-        1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,0,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,0,
+        1,1,1,0,1,1,0,0,1,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,0,
+        1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,
         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
-        1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        0,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,0,0,1,1,0,1,1,1
+        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,
+        1,1,0,0,1,1,0,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
+        0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        1,0,0,0,1,1,0,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1
     };
     uchar lut2[256] = {
-        1,1,1,0,1,1,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,0,
+        1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,
+        1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,0,
         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
-        1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        0,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        0,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,0,0,1,1,0,1,1,1
+        0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
+        1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        0,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,1,1,0,1,1,1
     };
 
     Mat src, dst;
     threshold(_src, src, 0, 1, THRESH_BINARY);
     src.convertTo(src, CV_8UC1);
 
-    int count;
-    do{
-        count = applyLUTNeighbors(src, dst, lut1);
-        dst.copyTo(src);
-        count += applyLUTNeighbors(src, dst, lut2);
-    } while(count > 0);
-    _dst.assign(dst);
+    while(applyLUTNeighbors(src, dst, lut1) + applyLUTNeighbors(dst, src, lut2));
+    _dst.assign(src);
 }
 
 void skeletonize(InputArray _src, OutputArray _dst, int type)

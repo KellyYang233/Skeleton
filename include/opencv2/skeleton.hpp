@@ -39,6 +39,11 @@ The function computes the given skeleton on a binary image.
 CV_EXPORTS_W void skeletonize( InputArray src, OutputArray dst, int type = SKEL_ZHANGSUEN);
 
 //! @} skeletonize_filter
+namespace skeleton{
+/** @brief Returns the version of this module.
+*/
+CV_EXPORTS_W String version();
+}
 //! @} skeleton
 
 } // cv
