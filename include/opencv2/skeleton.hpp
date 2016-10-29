@@ -25,7 +25,8 @@ namespace cv
 
 //! type of skeletonization operation
 enum SkeletonTypes{
-    SKEL_ZHANGSUEN       = 0
+    SKEL_MORPHOLOGICAL   = 0,
+    SKEL_ZHANGSUEN       = 1
 };
 
 /** @brief Returns a skeletonized image from a binary image.
