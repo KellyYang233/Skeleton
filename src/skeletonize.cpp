@@ -23,6 +23,7 @@ static int applyLUTNeighbors(InputArray _src, OutputArray _dst, uchar *lut)
         uchar *cur = src.ptr<uchar>(i);
         uchar *down = src.ptr<uchar>(i+1);
         for(int j = 1; j < src.cols-1; j++){
+	    uchar curj = cur[j];
             if(cur[j] == 0){
                 dstptr[j] = 0;
             }else{
@@ -30,7 +31,7 @@ static int applyLUTNeighbors(InputArray _src, OutputArray _dst, uchar *lut)
                                 128* cur[j-1] +                 8* cur[j+1] +
                                  64*down[j-1] +  32*down[j] +  16*down[j+1]];
             }
-            if(dstptr[j] != cur[j]){
+            if(dstptr[j] != curj){
                 numChanges++;
             }
         }
@@ -91,6 +92,23 @@ static void zhangSuenThinning(InputArray _src, OutputArray _dst)
     _dst.assign(src);
 }
 
+static void guoHallThinning(InputArray _src, OutputArray _dst)
+{
+    uchar lut1[256] = {
+1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,
+    };
+    uchar lut2[256] = {
+1,1,1,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    };
+
+    Mat src, dst;
+    threshold(_src, src, 0, 1, THRESH_BINARY);
+    src.convertTo(src, CV_8UC1);
+
+    while(applyLUTNeighbors(src, dst, lut1) + applyLUTNeighbors(dst, src, lut2));
+    _dst.assign(src);
+}
+
 void skeletonize(InputArray _src, OutputArray _dst, int type)
 {
     switch(type){
@@ -99,6 +117,9 @@ void skeletonize(InputArray _src, OutputArray _dst, int type)
             break;
         case SKEL_ZHANGSUEN:
             zhangSuenThinning(_src, _dst);
+            break;
+        case SKEL_GUOHALL:
+            guoHallThinning(_src, _dst);
             break;
     }
 }
