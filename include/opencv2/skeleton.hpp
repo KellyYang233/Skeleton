@@ -8,8 +8,11 @@
   @defgroup skeleton Skeleton
   @{
     @defgroup skeletonize Skeletonization
-       Functions here create skeletonization on images.
-    @defgroup skeleton_c C API
+       Functions to skeletonize an image.
+    @defgroup features Skeleton Features
+       Functions to manipulate skeletons.
+    @defgroup misc Miscellaneous
+       Miscellaneous functions.
   @}
 */
 
@@ -40,21 +43,29 @@ The function computes the given skeleton on a binary image.
  */
 CV_EXPORTS_W void skeletonize( InputArray src, OutputArray dst, int type = SKEL_ZHANGSUEN);
 
+//! @} skeletonize
+
+namespace skeleton{
+//! @addtogroup features
+//! @{
 /** @brief Returns an image where branch points are 1 and all others are 0.
 
 The function find the branch points of a skeleton.
 
 @param skel input skeleton
-@param branch output image of the same size and type as src containing branch points only.
+@param branch output image of the same size and type as skel containing branch points only.
  */
 CV_EXPORTS_W void branchPoints(InputArray skel, OutputArray branch);
 
-//! @} skeletonize_filter
-namespace skeleton{
+//! @} features
+
+//! @addtogroup misc
+//! @{
 /** @brief Returns the version of this module.
 */
 CV_EXPORTS_W String version();
 }
+//! @} misc
 //! @} skeleton
 
 } // cv
