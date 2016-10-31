@@ -36,9 +36,18 @@ The function computes the given skeleton on a binary image.
 
 @param src input image
 @param dst output image of the same size and type as src.
-@param type skeletonization algorithm to use to calculate skeleton
+@param type algorithm to calculate skeleton
  */
 CV_EXPORTS_W void skeletonize( InputArray src, OutputArray dst, int type = SKEL_ZHANGSUEN);
+
+/** @brief Returns an image where branch points are 1 and all others are 0.
+
+The function find the branch points of a skeleton.
+
+@param skel input skeleton
+@param branch output image of the same size and type as src containing branch points only.
+ */
+CV_EXPORTS_W void branchPoints(InputArray skel, OutputArray branch);
 
 //! @} skeletonize_filter
 namespace skeleton{
