@@ -57,6 +57,15 @@ The function find the branch points of a skeleton.
  */
 CV_EXPORTS_W void branchPoints(InputArray skel, OutputArray branch);
 
+/** @brief Returns an image where branch points are 1 and all others are 0.
+
+The function find the branch points of a skeleton.
+
+@param skel input skeleton
+@param endpts output image of the same size and type as skel containing end points only.
+ */
+CV_EXPORTS_W void endPoints(InputArray skel, OutputArray endpts);
+
 //! @} features
 
 //! @addtogroup misc
