@@ -9,8 +9,10 @@
   @{
     @defgroup skeletonize Skeletonization
        Functions to skeletonize an image.
-    @defgroup features Skeleton Features
-       Functions to manipulate skeletons.
+    @defgroup features Features
+       Functions to extract skeleton features.
+    @defgroup prune Pruning
+       Functions to prune skeletons.
     @defgroup misc Miscellaneous
        Miscellaneous functions.
   @}
@@ -67,6 +69,28 @@ The function find the branch points of a skeleton.
 CV_EXPORTS_W void endPoints(InputArray skel, OutputArray endpts);
 
 //! @} features
+
+//! @addtogroup prune
+//! @{
+/** @brief Prunes a skeleton.
+
+The function find the branch points of a skeleton.
+
+@param skel skeleton to prune
+@param minBranchLength minimum number of pixels a branch must contain to not be pruned
+ */
+CV_EXPORTS_W void prune(InputOutputArray skel, int minBranchLength);
+
+/** @brief Prunes a skeleton.
+
+The function find the branch points of a skeleton.
+
+@param skel skeleton to prune
+@param minBranchLength minimum number of pixels(as fraction of total skeletons pixels) a branch must contain to not be pruned
+ */
+CV_EXPORTS_W void prune(InputOutputArray skel, float minBranchLength);
+
+//! @} prune
 
 //! @addtogroup misc
 //! @{
