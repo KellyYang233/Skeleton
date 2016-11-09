@@ -95,16 +95,12 @@ static void morphologicalThinning(InputArray _src, OutputArray _dst)
 
 static void zhangSuenThinning(InputArray _src, OutputArray _dst)
 {
-    uchar lut1[256] = ZHANGSUEN_LUT1;
-    uchar lut2[256] = ZHANGSUEN_LUT2;
-    twoPassThinning(_src, _dst, lut1, lut2);
+    twoPassThinning(_src, _dst, ZHANGSUEN_LUT1, ZHANGSUEN_LUT2);
 }
 
 static void guoHallThinning(InputArray _src, OutputArray _dst)
 {
-    uchar lut1[256] = GUOHALL_LUT1;
-    uchar lut2[256] = GUOHALL_LUT2;
-    twoPassThinning(_src, _dst, lut1, lut2);
+    twoPassThinning(_src, _dst, GUOHALL_LUT1, GUOHALL_LUT2);
 }
 
 void skeletonize(InputArray _src, OutputArray _dst, int type)
@@ -124,13 +120,11 @@ void skeletonize(InputArray _src, OutputArray _dst, int type)
 
 void skeleton::branchPoints(InputArray _src, OutputArray _dst)
 {
-    uchar lut[256] = BRANCH_LUT;
-    simpleLut(_src, _dst, lut);
+    simpleLut(_src, _dst, BRANCH_LUT);
 }
 
 void skeleton::endPoints(InputArray _src, OutputArray _dst)
 {
-    uchar lut[256] = ENDPTS_LUT;
-    simpleLut(_src, _dst, lut);
+    simpleLut(_src, _dst, ENDPTS_LUT);
 }
 }

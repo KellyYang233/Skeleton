@@ -65,8 +65,21 @@ def zhang_suen_unit_skimage(num, iteration):
 
     return 1-(lut[num] & iteration)
 
+def branch_point_unit(num):
+    nbrs = num_to_nbrs(num)
+    NW, N, NE, E, SE, S, SW, W = nbrs
+    C = num_transitions(nbrs)
+    double = (W & NW & N) + (N & NE & E) + (E & SE * S) + (S & SW & W);
+    isbranch = (C > 2) or (C == 2 and double > 0)
+    return int(isbranch)
+
+def end_point_unit(num):
+    nbrs = num_to_nbrs(num)
+    C = num_transitions(nbrs)
+    return int(C==1)
+
 def lut_initializer_define(defname, lut):
-    return '#define {} {}'.format(defname, lut_to_str(lut))
+    return 'static uchar {}[256] = {};'.format(defname, lut_to_str(lut))
 
 def main():
     zhangsuen_lut1 = [zhang_suen_unit(n, 1) for n in range(256)]
@@ -75,8 +88,8 @@ def main():
     guohall_lut1 = [guo_hall_unit(n, 1) for n in range(256)]
     guohall_lut2 = [guo_hall_unit(n, 2) for n in range(256)]
 
-    branch_lut = [int(num_transitions(num_to_nbrs(n))>2) for n in range(256)]
-    endpts_lut = [int(num_transitions(num_to_nbrs(n))==1) for n in range(256)]
+    branch_lut = [branch_point_unit(n) for n in range(256)]
+    endpts_lut = [end_point_unit(n) for n in range(256)]
 
     print(lut_initializer_define('ZHANGSUEN_LUT1', zhangsuen_lut1), end='\n\n')
     print(lut_initializer_define('ZHANGSUEN_LUT2', zhangsuen_lut2), end='\n\n')
