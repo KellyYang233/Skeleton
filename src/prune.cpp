@@ -110,4 +110,28 @@ void skeleton::prune(InputOutputArray _skel, float minBranchLength)
     prune(_skel, minLength);
 }
 
+void skeleton::structure(InputArray _skel, OutputArrayOfArrays _dst)
+{
+    Mat terminalPoints, endPoints, skel, tskel;
+    skel = Mat::zeros(_skel.size() + Size(2, 2), _skel.type());
+    skel.convertTo(skel, CV_8UC1);
+
+    skeleton::branchPoints(skel, terminalPoints);
+    skelToPoints(terminalPoints, terminalPoints);
+    skeleton::endPoints(skel, endPoints);
+    skelToPoints(endPoints, endPoints);
+
+    for(int i = 0; i < endPoints.rows; i++){
+        Point endPoint = endPoints.at<Point>(i);
+        terminalPoints.push_back(endPoint);
+    }
+
+    std::vector<Mat> branches;
+
+    for(MatIterator_<Point> endPtIter = endPoints.begin<Point>(); endPtIter != endPoints.end<Point>(); endPtIter++){
+        Mat points;
+        traverse(skel, *endPtIter, terminalPoints, points);
+        branches.push_back(points);
+    }
+}
 }

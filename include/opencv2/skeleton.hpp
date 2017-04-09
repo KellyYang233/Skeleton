@@ -52,7 +52,7 @@ namespace skeleton{
 //! @{
 /** @brief Returns an image where branch points are 1 and all others are 0.
 
-The function find the branch points of a skeleton.
+The function finds the branch points of a skeleton.
 
 @param skel input skeleton
 @param branch output image of the same size and type as skel containing branch points only.
@@ -61,12 +61,22 @@ CV_EXPORTS_W void branchPoints(InputArray skel, OutputArray branch);
 
 /** @brief Returns an image where branch points are 1 and all others are 0.
 
-The function find the branch points of a skeleton.
+The function finds the branch points of a skeleton.
 
 @param skel input skeleton
 @param endpts output image of the same size and type as skel containing end points only.
  */
 CV_EXPORTS_W void endPoints(InputArray skel, OutputArray endpts);
+
+/** @brief Returns the broken down structure of the skeleton
+
+The function creates a structure containing the piece of the skeleton and their connecting
+nodes.
+
+@param skel input skeleton
+@param skel_struct output containing skeleton's structure.
+ */
+CV_EXPORTS_W void structure(InputArray skel, OutputArrayOfArrays skel_struct);
 
 //! @} features
 
